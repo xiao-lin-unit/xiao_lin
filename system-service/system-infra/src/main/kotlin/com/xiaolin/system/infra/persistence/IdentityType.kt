@@ -1,23 +1,34 @@
-//package com.xiaolin.system.infra.persistence
-//
-//import com.xiaolin.shared.infra.persistence.BaseEntity
-//import java.time.OffsetDateTime
-//
-///** 身份类型 */
-//data class IdentityType(
-//    val id: Long = 0,
-//    val code: String,
-//    val name: String,
-//    /** NULL = 通用身份 */
-//    val tenantTypeId: Long? = null,
-//    val description: String? = null,
-//    val builtin: Boolean = false,
-//    val sortNo: Int = 0,
-//    override val createdAt: OffsetDateTime,
-//    override val updatedAt: OffsetDateTime? = null,
-//    override val deletedAt: OffsetDateTime? = null,
-//    override val createdBy: Long? = null,
-//    override val updatedBy: Long? = null,
-//    override val deletedBy: Long? = null,
-//    override val deleted: Boolean = false,
-//) : BaseEntity
+package com.xiaolin.system.infra.persistence
+
+import com.xiaolin.shared.infra.persistence.BaseEntity
+import org.springframework.data.relational.core.mapping.Table
+import java.time.OffsetDateTime
+
+/** 身份类型 */
+@Table("sys.identity_type")
+class IdentityType(
+    id: Long = 0,
+    val code: String,
+    val name: String,
+    /** NULL = 通用身份 */
+    val tenantTypeId: Long? = null,
+    val description: String? = null,
+    val builtin: Boolean = false,
+    val sortNo: Int = 0,
+    createdAt: OffsetDateTime,
+    updatedAt: OffsetDateTime? = null,
+    deletedAt: OffsetDateTime? = null,
+    createdBy: Long? = null,
+    updatedBy: Long? = null,
+    deletedBy: Long? = null,
+    deleted: Boolean = false,
+) : BaseEntity(
+    id = id,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    deletedAt = deletedAt,
+    createdBy = createdBy,
+    updatedBy = updatedBy,
+    deletedBy = deletedBy,
+    deleted = deleted,
+)

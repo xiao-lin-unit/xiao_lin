@@ -6,8 +6,10 @@ import com.xiaolin.shared.infra.dao.rowMapperOf
 import com.xiaolin.system.infra.persistence.Permission
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
 
+@Component
 class PermissionDao(jdbc: NamedParameterJdbcTemplate
 ): AbstractJdbcDao<Permission>(jdbc, Permission::class) {
     override val rowMapper: RowMapper<Permission> = rowMapperOf { rs ->

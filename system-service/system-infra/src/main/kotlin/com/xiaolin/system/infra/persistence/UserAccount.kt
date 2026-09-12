@@ -103,67 +103,6 @@ class UserAccount(
         deleted = false
     )
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as UserAccount
-
-        if (id != other.id) return false
-        if (gender != other.gender) return false
-        if (status != other.status) return false
-        if (loginFailCount != other.loginFailCount) return false
-        if (createdBy != other.createdBy) return false
-        if (updatedBy != other.updatedBy) return false
-        if (deleted != other.deleted) return false
-        if (deletedBy != other.deletedBy) return false
-        if (username != other.username) return false
-        if (phone != other.phone) return false
-        if (email != other.email) return false
-        if (password != other.password) return false
-        if (realName != other.realName) return false
-        if (!idCardNo.contentEquals(other.idCardNo)) return false
-        if (avatar != other.avatar) return false
-        if (userKind != other.userKind) return false
-        if (pwdUpdatedAt != other.pwdUpdatedAt) return false
-        if (pwdExpireAt != other.pwdExpireAt) return false
-        if (lastLoginAt != other.lastLoginAt) return false
-        if (lastLoginIp != other.lastLoginIp) return false
-        if (lockedUntil != other.lockedUntil) return false
-        if (createdAt != other.createdAt) return false
-        if (updatedAt != other.updatedAt) return false
-        if (deletedAt != other.deletedAt) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = id?.hashCode() ?: 0
-        result = 31 * result + (gender ?: 0)
-        result = 31 * result + (status ?: 0)
-        result = 31 * result + (loginFailCount ?: 0)
-        result = 31 * result + (createdBy?.hashCode() ?: 0)
-        result = 31 * result + (updatedBy?.hashCode() ?: 0)
-        result = 31 * result + (deleted.hashCode() ?: 0)
-        result = 31 * result + (deletedBy?.hashCode() ?: 0)
-        result = 31 * result + (username.hashCode() ?: 0)
-        result = 31 * result + (phone?.hashCode() ?: 0)
-        result = 31 * result + (email?.hashCode() ?: 0)
-        result = 31 * result + (password?.hashCode() ?: 0)
-        result = 31 * result + (realName?.hashCode() ?: 0)
-        result = 31 * result + (idCardNo?.contentHashCode() ?: 0)
-        result = 31 * result + (avatar?.hashCode() ?: 0)
-        result = 31 * result + (userKind.hashCode() ?: 0)
-        result = 31 * result + (pwdUpdatedAt?.hashCode() ?: 0)
-        result = 31 * result + (pwdExpireAt?.hashCode() ?: 0)
-        result = 31 * result + (lastLoginAt?.hashCode() ?: 0)
-        result = 31 * result + (lastLoginIp?.hashCode() ?: 0)
-        result = 31 * result + (lockedUntil?.hashCode() ?: 0)
-        result = 31 * result + (createdAt.hashCode() ?: 0)
-        result = 31 * result + (updatedAt?.hashCode() ?: 0)
-        result = 31 * result + (deletedAt?.hashCode() ?: 0)
-        return result
-    }
 }
 
 

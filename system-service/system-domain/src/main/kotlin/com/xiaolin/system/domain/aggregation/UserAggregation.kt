@@ -4,21 +4,11 @@ import com.xiaolin.shared.common.constants.Gender
 import com.xiaolin.shared.common.constants.UserKind
 import com.xiaolin.shared.common.constants.UserStatus
 import com.xiaolin.shared.common.provider.TimeProvider
-import com.xiaolin.system.domain.model.entity.DingtalkLoginParam
-import com.xiaolin.system.domain.model.entity.EmailLoginParam
-import com.xiaolin.system.domain.model.entity.LoginFailReason
-import com.xiaolin.system.domain.model.entity.LoginFailure
-import com.xiaolin.system.domain.model.entity.LoginParam
-import com.xiaolin.system.domain.model.entity.LoginResult
-import com.xiaolin.system.domain.model.entity.LoginSuccess
-import com.xiaolin.system.domain.model.entity.PasswordLoginParam
-import com.xiaolin.system.domain.model.entity.PhoneLoginParam
-import com.xiaolin.system.domain.model.entity.QQLoginParam
-import com.xiaolin.system.domain.model.entity.WechatLoginParam
+import com.xiaolin.system.domain.model.entity.*
 import java.time.Clock
 import java.time.OffsetDateTime
 
-data class UserAggregation(
+class UserAggregation(
     val id: Long,
     val username: String,
     val phone: String? = null,
@@ -65,7 +55,7 @@ data class UserAggregation(
         var avatar: String? = null
         var gender: Int = Gender.UNKNOWN
         lateinit var userKind: UserKind
-        var status: Int = UserStatus.INACTIVE
+        var status: Int = UserStatus.NORMAL
         var pwdUpdatedAt: OffsetDateTime? = null
         var pwdExpireAt: OffsetDateTime? = null
         var lastLoginAt: OffsetDateTime? = null
@@ -257,7 +247,6 @@ data class UserAggregation(
         if (username != other.username) return false
         if (phone != other.phone) return false
         if (email != other.email) return false
-        if (password != other.password) return false
         if (realName != other.realName) return false
         if (!idCardNo.contentEquals(other.idCardNo)) return false
         if (avatar != other.avatar) return false
@@ -286,7 +275,6 @@ data class UserAggregation(
         result = 31 * result + username.hashCode()
         result = 31 * result + (phone?.hashCode() ?: 0)
         result = 31 * result + (email?.hashCode() ?: 0)
-        result = 31 * result + (password.hashCode() ?: 0)
         result = 31 * result + (realName?.hashCode() ?: 0)
         result = 31 * result + (idCardNo?.contentHashCode() ?: 0)
         result = 31 * result + (avatar?.hashCode() ?: 0)
@@ -324,6 +312,7 @@ data class UserAggregation(
             return LoginFailure(reason = LoginFailReason.BAD_CREDENTIALS, message = "登录失败,请检查登录信息")
         }
     }
+
 
 
 }

@@ -192,30 +192,30 @@ class JwtAuthConverterConfig {
 
     // ── L3：异步查库补全用户，principal 直接是业务对象 ──
     // @Bean
-    fun enrichedJwtAuthConverter(
-        userStore: ReactiveUserStore,
-    ): Converter<Jwt, Mono<AbstractAuthenticationToken>> = Converter { jwt ->
-        val userId = jwt.subject ?: throw OAuth2AuthenticationException(
-            OAuth2Error("invalid_token", "令牌缺少 sub", null)
-        )
-        userStore.findById(userId.toLong())                       // Mono<LoginUser>，非阻塞
-            .defaultIfEmpty(LoginUserInfo.anonymous(userId.toLong()))
-            .flatMap { user ->
-                if (!user.enabled) {
-                    Mono.error(
-                        OAuth2AuthenticationException(
-                            OAuth2Error("invalid_token", "账号已禁用", null)
-                        )
-                    )
-                } else {
-                    val authorities = extractAuthorities(jwt).toMutableSet()
-                    user.roles.forEach { authorities += SimpleGrantedAuthority("ROLE_${it.uppercase()}") }
-                    Mono.just<AbstractAuthenticationToken>(
-                        JwtUserAuthentication.authenticate(jwt, user, authorities)
-                    )
-                }
-            }
-    }
+//    fun enrichedJwtAuthConverter(
+//        userStore: ReactiveUserStore,
+//    ): Converter<Jwt, Mono<AbstractAuthenticationToken>> = Converter { jwt ->
+//        val userId = jwt.subject ?: throw OAuth2AuthenticationException(
+//            OAuth2Error("invalid_token", "令牌缺少 sub", null)
+//        )
+//        userStore.findById(userId.toLong())                       // Mono<LoginUser>，非阻塞
+//            .defaultIfEmpty(LoginUserInfo.anonymous(userId.toLong()))
+//            .flatMap { user ->
+//                if (!user.enabled) {
+//                    Mono.error(
+//                        OAuth2AuthenticationException(
+//                            OAuth2Error("invalid_token", "账号已禁用", null)
+//                        )
+//                    )
+//                } else {
+//                    val authorities = extractAuthorities(jwt).toMutableSet()
+//                    user.roles.forEach { authorities += SimpleGrantedAuthority("ROLE_${it.uppercase()}") }
+//                    Mono.just<AbstractAuthenticationToken>(
+//                        JwtUserAuthentication.authenticate(jwt, user, authorities)
+//                    )
+//                }
+//            }
+//    }
 }
 
 @Component

@@ -12,9 +12,10 @@ abstract class ConventionsPlugin: Plugin<Project> {
                 }
             }
             if (projectVersion().isNotBlank()) {
-                version.apply {
-                    projectVersion()
-                }
+                version = projectVersion()
+//                version.apply {
+//                    projectVersion()
+//                }
             }
             dependencies.apply {
                 for (dep in projectDependencies(target)) {

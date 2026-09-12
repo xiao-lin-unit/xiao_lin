@@ -18,6 +18,8 @@ class PermissionService(
     fun create(permission: PermissionCreateCommand): PermissionAggregation {
         val builder = PermissionAggregation.create(idGenerator.nextId())
         val permissionAggregation = builder.name(permission.name)
+            .appId(permission.appId ?: 0L)
+            .parentId(permission.parentId)
             .code(permission.code)
             .type(permission.type)
             .apiMethod(permission.apiMethod)

@@ -5,8 +5,10 @@ import com.xiaolin.system.application.command.PermissionCreateCommand
 import com.xiaolin.system.application.service.PermissionService
 import com.xiaolin.system.interfaces.converter.PermissionVOConverter
 import com.xiaolin.system.interfaces.vo.PermissionVO
+import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -17,7 +19,7 @@ class PermissionController(
 ) {
 
     @PostMapping("/create")
-    fun create(permission: PermissionCreateCommand): ApiResult<PermissionVO> {
+    fun create(@RequestBody @Valid permission: PermissionCreateCommand): ApiResult<PermissionVO> {
         val aggregation = permissionService.create(permission)
         return ApiResult.success(PermissionVOConverter.toPermissionVO(aggregation))
     }

@@ -7,7 +7,6 @@ import com.xiaolin.shared.common.login.LoginUserInfo
 import com.xiaolin.shared.interfaces.model.ApiResult
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory.disable
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
@@ -100,8 +99,8 @@ class SystemSecurityConfig(
             userId = jwt.subject?.toLong() ?: 0L,
             username = jwt.getClaimAsString("username").orEmpty(),
             roles = roles.toSet(),
-            tenantId = jwt.getClaimAsString("tenantId")?.toLongOrNull() ?: 0L,
-            userKind = UserKind.valueOf(jwt.getClaimAsString("userKind").orEmpty()),
+            tenantId = jwt.getClaimAsString("tenantId")?.toLong() ?: 0L,
+            userKind = jwt.getClaimAsString("userKind")?.let { runCatching { UserKind.valueOf(it) }.getOrDefault(UserKind.NORMAL) } ?: UserKind.NORMAL,
         )
         JwtUserAuthentication.authenticate(jwt, user, authorities)
     }

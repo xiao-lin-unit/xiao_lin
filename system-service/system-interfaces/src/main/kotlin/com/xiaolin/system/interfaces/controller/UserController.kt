@@ -5,6 +5,7 @@ import com.xiaolin.system.application.command.UserRegisterCommand
 import com.xiaolin.system.application.service.UserService
 import com.xiaolin.system.interfaces.converter.UserVOConverter
 import com.xiaolin.system.interfaces.vo.UserVO
+import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.web.bind.annotation.*
 
@@ -15,7 +16,7 @@ class UserController(
 ) {
 
     @PostMapping("/register")
-    fun register(@RequestBody user: UserRegisterCommand): ApiResult<UserVO> {
+    fun register(@RequestBody @Valid user: UserRegisterCommand): ApiResult<UserVO> {
         val registerUser = userService.registerUser(user)
         return ApiResult.success(UserVOConverter.toUserVO(registerUser))
     }

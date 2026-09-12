@@ -2,8 +2,10 @@ package com.xiaolin.system.infra.persistence
 
 import com.xiaolin.shared.common.constants.PermissionType
 import com.xiaolin.shared.infra.persistence.BaseEntity
+import org.springframework.data.relational.core.mapping.Table
 import java.time.OffsetDateTime
 
+@Table("sys.permission")
 /** 功能权限：系统级数据，租户只读 */
 class Permission(
     id: Long,
@@ -27,7 +29,7 @@ class Permission(
     /** 系统内置，租户不可增删改 */
     val builtin: Boolean = true,
     val remark: String? = null,
-    createdAt: OffsetDateTime,
+    createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
     createdBy: Long? = null,
