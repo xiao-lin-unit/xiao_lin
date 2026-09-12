@@ -1,4 +1,4 @@
-//package com.xiaolin.system.infra.persistence
+package com.xiaolin.system.infra.persistence//package com.xiaolin.system.infra.persistence
 //
 //import com.xiaolin.shared.infra.persistence.BaseEntity
 //import java.time.OffsetDateTime

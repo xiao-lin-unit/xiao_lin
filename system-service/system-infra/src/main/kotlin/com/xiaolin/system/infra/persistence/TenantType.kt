@@ -2,6 +2,7 @@ package com.xiaolin.system.infra.persistence
 
 import com.xiaolin.shared.infra.dao.SqlType
 import com.xiaolin.shared.infra.persistence.BaseEntity
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.sql.Types
 import java.time.OffsetDateTime
@@ -14,9 +15,11 @@ class TenantType(
     val name: String,
     val description: String? = null,
     /** 组织层级模板，创建租户时据此生成默认组织树。例：[{"code":"VILLAGE","name":"村"}] */
+    @Column("org_levels")
     @SqlType(Types.OTHER)
     val orgLevels: String = "[]",
     /** 默认启用的应用 code 列表，创建租户时自动开通。权威来源是 sys.tenant_type_app */
+    @Column("default_apps")
     @SqlType(Types.OTHER)
     val defaultApps: String = "[]",
     /** 1启用 0停用 */
@@ -24,7 +27,7 @@ class TenantType(
     /** 内置类型不可删除 */
     val builtin: Boolean = false,
     val sortNo: Int = 0,
-    createdAt: OffsetDateTime,
+    createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
     createdBy: Long? = null,

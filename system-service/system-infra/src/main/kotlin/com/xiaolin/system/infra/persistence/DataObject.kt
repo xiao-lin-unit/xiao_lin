@@ -2,6 +2,7 @@ package com.xiaolin.system.infra.persistence
 
 import com.xiaolin.shared.infra.dao.SqlType
 import com.xiaolin.shared.infra.persistence.BaseEntity
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.sql.Types
 import java.time.OffsetDateTime
@@ -55,6 +56,7 @@ class DataScopePolicy(
     /** GLOBAL / TENANT_ALL / ORG_TREE / ORG_SELF / MEMBER_TEAM / MEMBER_SELF / CUSTOM_SQL / DENY_ALL */
     val scopeType: String,
     /** CUSTOM_SQL 时的表达式，如 {"where":"alias.region_code = :regionCode","params":{...}} */
+    @Column("scope_expression")
     @SqlType(Types.OTHER)
     val scopeExpression: String = "{}",
     /** ALLOW 放行 / DENY 拒绝（优先级最高） */
@@ -63,7 +65,7 @@ class DataScopePolicy(
     val builtin: Boolean = true,
     val status: Int = 1, // smallint
     val description: String? = null,
-    createdAt: OffsetDateTime,
+    createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
     createdBy: Long? = null,

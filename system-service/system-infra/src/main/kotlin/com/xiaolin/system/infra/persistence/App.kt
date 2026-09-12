@@ -1,5 +1,7 @@
 package com.xiaolin.system.infra.persistence
 
+import com.xiaolin.shared.common.constants.AppType
+import com.xiaolin.shared.common.constants.CommonStatus
 import com.xiaolin.shared.infra.persistence.BaseEntity
 import org.springframework.data.relational.core.mapping.Table
 import java.time.OffsetDateTime
@@ -11,18 +13,18 @@ class App(
     val code: String,
     val name: String,
     /** BUSINESS 业务 / ADMIN 管理 / PORTAL 门户 */
-    val type: String = "BUSINESS",
+    val type: AppType = AppType.BUSINESS,
     /** 前端入口 */
     val entryUrl: String? = null,
     val icon: String? = null,
     val description: String? = null,
     /** 1-启用 0-禁用 */
-    val status: Int = 1, // smallint
+    val status: Int = CommonStatus.ENABLED, // smallint
     /** 是否内置 */
     val builtin: Boolean = false,
     /** 排序编号 */
     val sortNo: Int = 0,
-    createdAt: OffsetDateTime,
+    createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
     createdBy: Long? = null,

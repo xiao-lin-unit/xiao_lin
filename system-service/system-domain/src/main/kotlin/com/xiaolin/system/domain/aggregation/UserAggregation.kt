@@ -35,6 +35,7 @@ class UserAggregation(
     var lastLoginIp: String? = null,
     var loginFailCount: Int = 0,
     var lockedUntil: OffsetDateTime? = null,
+    var version: Int = 0,
     val createdAt: OffsetDateTime? = null,
     var updatedAt: OffsetDateTime? = null,
     var deletedAt: OffsetDateTime? = null,
@@ -62,6 +63,7 @@ class UserAggregation(
         var lastLoginIp: String? = null
         var loginFailCount: Int = 0
         var lockedUntil: OffsetDateTime? = null
+        var version: Int = 0
         var createdAt: OffsetDateTime? = null
         var updatedAt: OffsetDateTime? = null
         var deletedAt: OffsetDateTime? = null
@@ -88,6 +90,8 @@ class UserAggregation(
         fun lastLoginIp(lastLoginIp: String?) = apply { this.lastLoginIp = lastLoginIp }
         fun loginFailCount(loginFailCount: Int) = apply { this.loginFailCount = loginFailCount }
         fun lockedUntil(lockedUntil: OffsetDateTime?) = apply { this.lockedUntil = lockedUntil }
+        fun version(version: Int) = apply { this.version = version }
+
         fun createdBy(createdBy: Long?) = apply { this.createdBy = createdBy }
         fun updatedBy(updatedBy: Long?) = apply { this.updatedBy = updatedBy }
         fun createdAt(createdAt: OffsetDateTime?) = apply { this.createdAt = createdAt }
@@ -122,6 +126,7 @@ class UserAggregation(
                 lastLoginIp = lastLoginIp,
                 loginFailCount = loginFailCount,
                 lockedUntil = lockedUntil,
+                version = version,
                 createdBy = createdBy,
                 createdAt = createdAt,
                 updatedBy = updatedBy,
@@ -141,6 +146,7 @@ class UserAggregation(
             return builder(id)
                 .pwdUpdatedAt(now)
                 .pwdExpireAt(now.plusYears(1L))
+                .version(0)
                 .createdAt(now)
                 .updatedAt(now)
                 .deleted(false)

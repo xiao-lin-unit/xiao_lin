@@ -15,7 +15,7 @@ class IdentityType(
     val description: String? = null,
     val builtin: Boolean = false,
     val sortNo: Int = 0,
-    createdAt: OffsetDateTime,
+    createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
     createdBy: Long? = null,

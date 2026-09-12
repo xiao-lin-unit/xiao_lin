@@ -2,6 +2,7 @@ package com.xiaolin.system.infra.persistence
 
 import com.xiaolin.shared.infra.dao.SqlType
 import com.xiaolin.shared.infra.persistence.BaseEntity
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.sql.Types
 import java.time.OffsetDateTime
@@ -22,12 +23,13 @@ class Member(
     val isTenantAdmin: Boolean = false,
     /** 1正常 0待审核 2停用 3退出 */
     val status: Int = 1, // smallint
-    val joinedAt: OffsetDateTime,
+    val joinedAt: OffsetDateTime? = null,
     /** 扩展信息（摊位号、经营品类、资质等） */
+    @Column("profile")
     @SqlType(Types.OTHER)
     val profile: String = "{}",
     val invitedBy: Long? = null,
-    createdAt: OffsetDateTime,
+    createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
     createdBy: Long? = null,
@@ -80,6 +82,7 @@ class MemberIdentity(
     val verifiedAt: OffsetDateTime? = null,
     val verifiedBy: Long? = null,
     /** 资质材料（营业执照、摊位证等） */
+    @Column("credential")
     @SqlType(Types.OTHER)
     val credential: String = "{}",
     createdAt: OffsetDateTime,

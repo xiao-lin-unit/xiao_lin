@@ -2,6 +2,7 @@ package com.xiaolin.system.infra.persistence
 
 import com.xiaolin.shared.infra.dao.SqlType
 import com.xiaolin.shared.infra.persistence.BaseEntity
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.sql.Types
 import java.time.OffsetDateTime
@@ -30,9 +31,10 @@ class Tenant(
     val status: Int = 1, // smallint
     val expireAt: OffsetDateTime? = null,
     /** 租户个性化配置（菜单、参数、开关） */
+    @Column("config")
     @SqlType(Types.OTHER)
     val config: String = "{}",
-    createdAt: OffsetDateTime,
+    createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
     createdBy: Long? = null,

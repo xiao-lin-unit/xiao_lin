@@ -21,7 +21,7 @@ class Role(
     val builtin: Boolean = false,
     val status: Int = 1, // smallint
     val sortNo: Int = 0,
-    createdAt: OffsetDateTime,
+    createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
     createdBy: Long? = null,
@@ -51,7 +51,7 @@ class GlobalRole(
     val isSuper: Boolean = false,
     val builtin: Boolean = false,
     val status: Int = 1,
-    createdAt: OffsetDateTime,
+    createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
     createdBy: Long? = null,

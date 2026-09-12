@@ -20,7 +20,7 @@ class Org(
     val leaderMemberId: Long? = null,
     val sortNo: Int = 0,
     val status: Int = 1, // smallint
-    createdAt: OffsetDateTime,
+    createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
     createdBy: Long? = null,

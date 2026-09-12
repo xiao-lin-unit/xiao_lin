@@ -1,9 +1,9 @@
 package com.xiaolin.shared.common.constants
 
-object AppType {
-    const val BUSINESS = "BUSINESS"
-    const val ADMIN = "ADMIN"
-    const val PORTAL = "PORTAL"
+enum class AppType {
+    BUSINESS,
+    ADMIN,
+    PORTAL
 }
 
 enum class PermissionType {
@@ -46,6 +46,11 @@ object UserStatus {
     const val NORMAL = 1
     const val FROZEN = 2
     const val CANCELLED = 3
+}
+
+object CommonStatus {
+    const val ENABLED = 1
+    const val DISABLED = 0
 }
 
 object ScopeType {

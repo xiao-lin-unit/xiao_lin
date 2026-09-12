@@ -25,6 +25,7 @@ object UserConverter {
             pwdExpireAt = userAggregation.pwdExpireAt,
             loginFailCount = userAggregation.loginFailCount,
             lockedUntil = userAggregation.lockedUntil,
+            version = userAggregation.version,
             createdAt = userAggregation.createdAt,
             updatedAt = userAggregation.updatedAt,
             deletedAt = userAggregation.deletedAt,
@@ -54,6 +55,7 @@ object UserConverter {
             .lastLoginIp(userAccount.lastLoginIp)
             .loginFailCount(userAccount.loginFailCount)
             .lockedUntil(userAccount.lockedUntil)
+            .version(userAccount.version)
             .createdAt(userAccount.createdAt)
             .updatedAt(userAccount.updatedAt)
             .deletedAt(userAccount.deletedAt)

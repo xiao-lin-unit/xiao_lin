@@ -15,10 +15,13 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.namedparam.SqlParameterSource
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.javaGetter
 
@@ -161,7 +164,7 @@ abstract class AbstractJdbcDao<T : Any>(
                 "VALUES (${holders(insertProps.map { it.prop })})"
     }
 
-    protected open val updateSql: String by lazy {
+    protected open val  updateSql: String by lazy {
         val set = updateProps.map { "${quote(it.column)} = :${it.prop}" } +
                 listOfNotNull(versionProp?.let { v ->
                     val c = quote(columnOf(v))

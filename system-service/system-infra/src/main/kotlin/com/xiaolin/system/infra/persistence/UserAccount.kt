@@ -63,7 +63,7 @@ class UserAccount(
     val lockedUntil: OffsetDateTime? = null,
     @Column("version")
     @Version
-    val version: Int = 0,
+    var version: Int = 0,
     createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,
