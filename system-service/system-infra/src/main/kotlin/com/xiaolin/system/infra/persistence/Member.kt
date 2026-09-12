@@ -1,7 +1,9 @@
 package com.xiaolin.system.infra.persistence
 
+import com.xiaolin.shared.infra.dao.SqlType
 import com.xiaolin.shared.infra.persistence.BaseEntity
 import org.springframework.data.relational.core.mapping.Table
+import java.sql.Types
 import java.time.OffsetDateTime
 
 /** 成员：用户在某租户内的身份，权限授予的最小载体。切租户 = 切 member */
@@ -22,6 +24,7 @@ class Member(
     val status: Int = 1, // smallint
     val joinedAt: OffsetDateTime,
     /** 扩展信息（摊位号、经营品类、资质等） */
+    @SqlType(Types.OTHER)
     val profile: String = "{}",
     val invitedBy: Long? = null,
     createdAt: OffsetDateTime,
@@ -65,6 +68,7 @@ data class MemberOrg(
 )
 
 /** 成员身份：支持同一租户内多重身份 */
+@Table("sys.member_identity")
 class MemberIdentity(
     id: Long = 0,
     val memberId: Long,
@@ -76,6 +80,7 @@ class MemberIdentity(
     val verifiedAt: OffsetDateTime? = null,
     val verifiedBy: Long? = null,
     /** 资质材料（营业执照、摊位证等） */
+    @SqlType(Types.OTHER)
     val credential: String = "{}",
     createdAt: OffsetDateTime,
     updatedAt: OffsetDateTime? = null,

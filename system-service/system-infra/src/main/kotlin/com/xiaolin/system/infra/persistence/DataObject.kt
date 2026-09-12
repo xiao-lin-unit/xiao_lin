@@ -1,7 +1,9 @@
 package com.xiaolin.system.infra.persistence
 
+import com.xiaolin.shared.infra.dao.SqlType
 import com.xiaolin.shared.infra.persistence.BaseEntity
 import org.springframework.data.relational.core.mapping.Table
+import java.sql.Types
 import java.time.OffsetDateTime
 
 /** 受数据权限保护的资源（业务表）注册表；拦截器据此改写 SQL */
@@ -44,6 +46,7 @@ class DataObject(
 )
 
 /** 数据范围策略：系统级预置，租户只能在其中选用，不能自建新规则 */
+@Table("sys.data_scope_policy")
 class DataScopePolicy(
     id: Long = 0,
     val objectId: Long,
@@ -52,6 +55,7 @@ class DataScopePolicy(
     /** GLOBAL / TENANT_ALL / ORG_TREE / ORG_SELF / MEMBER_TEAM / MEMBER_SELF / CUSTOM_SQL / DENY_ALL */
     val scopeType: String,
     /** CUSTOM_SQL 时的表达式，如 {"where":"alias.region_code = :regionCode","params":{...}} */
+    @SqlType(Types.OTHER)
     val scopeExpression: String = "{}",
     /** ALLOW 放行 / DENY 拒绝（优先级最高） */
     val effect: String = "ALLOW",
@@ -84,6 +88,7 @@ class DataScopePolicy(
  * 注意：DDL 上有表达式唯一索引 uk_dsb_subject_scope，
  *      (policy_id, subject_type, subject_id, COALESCE(app_id,0), COALESCE(tenant_id,0)) 不可重复。
  */
+@Table("sys.data_scope_binding")
 class DataScopeBinding(
     id: Long = 0,
     val policyId: Long,

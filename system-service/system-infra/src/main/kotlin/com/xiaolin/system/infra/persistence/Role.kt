@@ -41,6 +41,7 @@ class Role(
 
 
 /** 全局角色：不属于任何租户，用于超级管理员及未来的运营角色 */
+@Table("sys.global_role")
 class GlobalRole(
     id: Long = 0,
     val code: String,

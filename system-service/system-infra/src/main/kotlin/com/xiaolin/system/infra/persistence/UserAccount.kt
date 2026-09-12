@@ -3,6 +3,7 @@ package com.xiaolin.system.infra.persistence
 import com.xiaolin.shared.common.constants.UserKind
 import com.xiaolin.shared.infra.dao.SqlType
 import com.xiaolin.shared.infra.persistence.BaseEntity
+import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.sql.Types
@@ -60,6 +61,9 @@ class UserAccount(
     val loginFailCount: Int = 0,
     @Column("locked_until")
     val lockedUntil: OffsetDateTime? = null,
+    @Column("version")
+    @Version
+    val version: Int = 0,
     createdAt: OffsetDateTime? = null,
     updatedAt: OffsetDateTime? = null,
     deletedAt: OffsetDateTime? = null,

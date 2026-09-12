@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":shared:shared-common"))
 
     implementation("org.springframework.boot:spring-boot-starter-webmvc:4.1.0")
+    implementation("org.springframework.security:spring-security-core:7.1.0")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.3.21")
     implementation("tools.jackson.module:jackson-module-kotlin:3.1.4")

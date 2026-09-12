@@ -99,7 +99,7 @@ class SystemSecurityConfig(
             userId = jwt.subject?.toLong() ?: 0L,
             username = jwt.getClaimAsString("username").orEmpty(),
             roles = roles.toSet(),
-            tenantId = jwt.getClaimAsString("tenantId")?.toLong() ?: 0L,
+            tenantId = jwt.getClaim("tenantId") as? Long,
             userKind = jwt.getClaimAsString("userKind")?.let { runCatching { UserKind.valueOf(it) }.getOrDefault(UserKind.NORMAL) } ?: UserKind.NORMAL,
         )
         JwtUserAuthentication.authenticate(jwt, user, authorities)
