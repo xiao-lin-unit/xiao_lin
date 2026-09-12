@@ -15,8 +15,8 @@ class PermissionDao(jdbc: NamedParameterJdbcTemplate
     override val rowMapper: RowMapper<Permission> = rowMapperOf { rs ->
         Permission(
             id = rs.getLong("id"),
-            appId = rs.getLong("app_id"),
-            parentId = rs.getLong("parent_id"),
+            appId = rs.getObject("app_id", Long::class.java),
+            parentId = rs.getObject("parent_id", Long::class.java),
             code = rs.getString("code"),
             name = rs.getString("name"),
             type = PermissionType.valueOf(rs.getString("type")),
@@ -31,9 +31,9 @@ class PermissionDao(jdbc: NamedParameterJdbcTemplate
             createdAt = rs.getObject("created_at", OffsetDateTime::class.java),
             updatedAt = rs.getObject("updated_at", OffsetDateTime::class.java),
             deletedAt = rs.getObject("deleted_at", OffsetDateTime::class.java),
-            createdBy = rs.getLong("created_by"),
-            updatedBy = rs.getLong("updated_by"),
-            deletedBy = rs.getLong("deleted_by"),
+            createdBy = rs.getObject("created_by", Long::class.java),
+            updatedBy = rs.getObject("updated_by", Long::class.java),
+            deletedBy = rs.getObject("deleted_by", Long::class.java),
             deleted = rs.getBoolean("deleted"),
         )
     }

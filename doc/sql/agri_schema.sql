@@ -1,5 +1,5 @@
 -- ============================================================================
---  农业交易系统 · 权限与多租户 数据库结构（修订版 v2）
+--  农业交易系统 · 权限与多租户 数据库结构（修订版 v4）
 --  数据库：PostgreSQL 16+
 --
 --  设计要点：
@@ -24,6 +24,34 @@
 --    f. data_scope_binding 增加表达式唯一索引，防止同一策略重复绑定
 --    g. login_log / audit_log 增加 DEFAULT 分区，避免缺分区导致写入失败
 --    h. 权限快照查询（11.2）补充租户管理员短路分支
+--
+--  v4 相对 v3 的变更：移除全部物理外键，关联关系改由应用层维护
+--    a. 删除全部 32 处 REFERENCES 子句（含 17 处 ON DELETE CASCADE）。
+--       原外键列统一以 `REF->sys.xxx(id) 应用层维护` 注释保留语义，供开发时对照。
+--    b. 原外键列一律建普通索引（部分索引带 WHERE deleted_at IS NULL，与查询条件对齐）。
+--       缺失索引的 5 处已补齐：
+--         - sys.identity_type(tenant_type_id)
+--         - sys.role(app_id)                    —— 原仅靠 (tenant_id, app_id) 联合索引，app_id 非前缀
+--         - sys.global_role_permission(permission_id)
+--         - sys.user_global_role(global_role_id)
+--         - sys.data_scope_binding(policy_id)
+--
+--    为什么移除物理外键：
+--       1. 十万级租户 + 高频写入下，外键约束每行都要做一次 referencing 表查找，
+--          写入吞吐与锁竞争成本显著；
+--       2. 本系统普遍采用「逻辑删除」（deleted 标志）而非物理删除，
+--          外键的 ON DELETE CASCADE 对逻辑删除完全无感，形同虚设；
+--       3. 跨服务 / 分库演进时物理外键是硬阻碍；
+--       4. 雪花 ID 由应用层生成，插入顺序无法保证父子先后，外键会误伤。
+--
+--    ⚠️ 移除后必须靠应用层保证（否则会产生脏引用）：
+--       1. 写入前校验被引用行存在且未逻辑删除（各 Service 的 getById 已在做）；
+--       2. 删除父行前检查子行引用数（TenantTypeService / OrgService / RoleService
+--          已进入引用检查，见各 Service 的 verifyDeletable / countByXxx）；
+--       3. 原 ON DELETE CASCADE 的表（member_identity / member_org / member_role /
+--          role_permission / global_role_permission / user_global_role /
+--          data_scope_policy / data_scope_binding / user_context 等）
+--          的级联清理须在应用层显式实现，数据库不再代劳。
 --
 --  约定：updated_at 由应用层在 INSERT / UPDATE 时显式写入，
 --        数据库仅保留 DEFAULT now() 作为插入兜底，不再有任何维护触发器。
@@ -209,8 +237,8 @@ ON TABLE sys.app IS '应用：功能权限的聚合单元，一个应用 = 一�
 CREATE TABLE sys.tenant_type_app
 (
     id             bigint PRIMARY KEY,
-    tenant_type_id bigint      NOT NULL REFERENCES sys.tenant_type (id),
-    app_id         bigint      NOT NULL REFERENCES sys.app (id),
+    tenant_type_id bigint      NOT NULL, -- REF->sys.tenant_type(id) 应用层维护
+    app_id         bigint      NOT NULL, -- REF->sys.app(id) 应用层维护
     is_default_app boolean     NOT NULL DEFAULT false, -- 登录后默认进入
     is_required    boolean     NOT NULL DEFAULT false, -- 是否强制开通不可关闭
     sort_no        int         NOT NULL DEFAULT 0,
@@ -225,8 +253,8 @@ ON TABLE sys.tenant_type_app IS '租户类型的应用可见范围：农户可�
 CREATE TABLE sys.permission
 (
     id             bigint PRIMARY KEY,
-    app_id         bigint       NOT NULL REFERENCES sys.app (id),
-    parent_id      bigint REFERENCES sys.permission (id),
+    app_id         bigint       NOT NULL, -- REF->sys.app(id) 应用层维护
+    parent_id      bigint, -- REF->sys.permission(id) 应用层维护
     code           varchar(128) NOT NULL,               -- 如 trade:order:create
     name           varchar(128) NOT NULL,
     type           varchar(24)  NOT NULL DEFAULT 'API', -- MENU菜单 BUTTON按钮 API接口 ELEMENT界面元素
@@ -262,7 +290,7 @@ CREATE TABLE sys.identity_type
     id             bigint PRIMARY KEY,
     code           varchar(64)  NOT NULL,
     name           varchar(128) NOT NULL,
-    tenant_type_id bigint REFERENCES sys.tenant_type (id), -- NULL = 通用身份
+    tenant_type_id bigint, -- NULL = 通用身份 | REF->sys.tenant_type(id) 应用层维护
     description    text,
     builtin        boolean      NOT NULL DEFAULT false,
     sort_no        int          NOT NULL DEFAULT 0,
@@ -276,6 +304,7 @@ CREATE TABLE sys.identity_type
     CONSTRAINT uk_identity_type_code UNIQUE (code)
 
 );
+CREATE INDEX idx_identity_type_tenant_type ON sys.identity_type (tenant_type_id) WHERE tenant_type_id IS NOT NULL;
 COMMENT
 ON TABLE sys.identity_type IS '身份类型：表驱动，支持后续新增用户类型';
 
@@ -288,8 +317,8 @@ ON TABLE sys.identity_type IS '身份类型：表驱动，支持后续新增用�
 CREATE TABLE sys.tenant
 (
     id             bigint PRIMARY KEY,
-    tenant_type_id bigint       NOT NULL REFERENCES sys.tenant_type (id),
-    parent_id      bigint REFERENCES sys.tenant (id),         -- 预留：代理商 -> 下级代理
+    tenant_type_id bigint       NOT NULL, -- REF->sys.tenant_type(id) 应用层维护
+    parent_id      bigint, -- 预留：代理商 -> 下级代理 | REF->sys.tenant(id) 应用层维护
     path           varchar(512) NOT NULL DEFAULT '/',         -- 租户树路径 /1/12/135/
     level_no       int          NOT NULL DEFAULT 1,
     code           varchar(64)  NOT NULL,                     -- 租户唯一编码
@@ -338,8 +367,8 @@ CREATE TRIGGER trg_tenant_path_cascade
 CREATE TABLE sys.org
 (
     id               bigint PRIMARY KEY,
-    tenant_id        bigint       NOT NULL REFERENCES sys.tenant (id) ON DELETE CASCADE,
-    parent_id        bigint REFERENCES sys.org (id),
+    tenant_id        bigint       NOT NULL, -- REF->sys.tenant(id) 应用层维护
+    parent_id        bigint, -- REF->sys.org(id) 应用层维护
     path             varchar(512) NOT NULL,               -- /3/17/42/，由触发器维护
     level_no         int          NOT NULL DEFAULT 1,     -- 由触发器维护
     code             varchar(64),
@@ -426,11 +455,11 @@ ON COLUMN sys.user_account.user_kind IS 'SUPER_ADMIN 为特殊用户：不属任
 CREATE TABLE sys.member
 (
     id              bigint PRIMARY KEY,
-    tenant_id       bigint      NOT NULL REFERENCES sys.tenant (id) ON DELETE CASCADE,
-    user_id         bigint      NOT NULL REFERENCES sys.user_account (id),
+    tenant_id       bigint      NOT NULL, -- REF->sys.tenant(id) 应用层维护
+    user_id         bigint      NOT NULL, -- REF->sys.user_account(id) 应用层维护
     member_no       varchar(64),                             -- 租户内成员编号
     display_name    varchar(64),                             -- 在租户内展示的名称（可与真实姓名不同）
-    org_id          bigint REFERENCES sys.org (id),          -- 主组织（村民小组 / 摊位区）
+    org_id          bigint, -- 主组织（村民小组 / 摊位区） | REF->sys.org(id) 应用层维护
     is_tenant_admin boolean     NOT NULL DEFAULT false,      -- 租户管理员：拥有全部应用权限
     status          smallint    NOT NULL DEFAULT 1,          -- 1正常 0待审核 2停用 3退出
     joined_at       timestamptz NOT NULL DEFAULT now(),
@@ -459,8 +488,8 @@ ON TABLE sys.member IS '成员：用户在某租户内的身份，权限授予�
 CREATE TABLE sys.member_identity
 (
     id               bigint PRIMARY KEY,
-    member_id        bigint      NOT NULL REFERENCES sys.member (id) ON DELETE CASCADE,
-    identity_type_id bigint      NOT NULL REFERENCES sys.identity_type (id),
+    member_id        bigint      NOT NULL, -- REF->sys.member(id) 应用层维护
+    identity_type_id bigint      NOT NULL, -- REF->sys.identity_type(id) 应用层维护
     is_primary       boolean     NOT NULL DEFAULT false,       -- 主身份
     status           smallint    NOT NULL DEFAULT 1,
     verified_at      timestamptz,                              -- 实名/资质认证时间
@@ -485,8 +514,8 @@ ON TABLE sys.member_identity IS '成员身份：支持同一租户内多重身�
 CREATE TABLE sys.member_org
 (
     id         bigint PRIMARY KEY,
-    member_id  bigint      NOT NULL REFERENCES sys.member (id) ON DELETE CASCADE,
-    org_id     bigint      NOT NULL REFERENCES sys.org (id) ON DELETE CASCADE,
+    member_id  bigint      NOT NULL, -- REF->sys.member(id) 应用层维护
+    org_id     bigint      NOT NULL, -- REF->sys.org(id) 应用层维护
     is_primary boolean     NOT NULL DEFAULT false,
     created_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT uk_member_org UNIQUE (member_id, org_id)
@@ -504,9 +533,9 @@ ON TABLE sys.member_org IS '成员与组织的多对多关系，支撑按组织�
 CREATE TABLE sys.role
 (
     id              bigint PRIMARY KEY,
-    tenant_id       bigint       NOT NULL REFERENCES sys.tenant (id) ON DELETE CASCADE,
-    app_id          bigint       NOT NULL REFERENCES sys.app (id),
-    parent_id       bigint REFERENCES sys.role (id),     -- 角色继承
+    tenant_id       bigint       NOT NULL, -- REF->sys.tenant(id) 应用层维护
+    app_id          bigint       NOT NULL, -- REF->sys.app(id) 应用层维护
+    parent_id       bigint, -- 角色继承 | REF->sys.role(id) 应用层维护
     code            varchar(64)  NOT NULL,
     name            varchar(128) NOT NULL,
     description     text,
@@ -524,6 +553,7 @@ CREATE TABLE sys.role
     CONSTRAINT uk_role_tenant_app_code UNIQUE (tenant_id, app_id, code)
 
 );
+CREATE INDEX idx_role_app ON sys.role (app_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_role_tenant_app ON sys.role (tenant_id, app_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_role_parent ON sys.role (parent_id) WHERE deleted_at IS NULL;
 COMMENT
@@ -533,8 +563,8 @@ ON TABLE sys.role IS '租户自定义角色，按应用划分；parent_id 支持
 CREATE TABLE sys.role_permission
 (
     id            bigint PRIMARY KEY,
-    role_id       bigint      NOT NULL REFERENCES sys.role (id) ON DELETE CASCADE,
-    permission_id bigint      NOT NULL REFERENCES sys.permission (id) ON DELETE CASCADE,
+    role_id       bigint      NOT NULL, -- REF->sys.role(id) 应用层维护
+    permission_id bigint      NOT NULL, -- REF->sys.permission(id) 应用层维护
     created_at    timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT uk_role_permission UNIQUE (role_id, permission_id)
 );
@@ -547,8 +577,8 @@ ON TABLE sys.role_permission IS '角色包含的功能权限（仅限该角色�
 CREATE TABLE sys.member_role
 (
     id             bigint PRIMARY KEY,
-    member_id      bigint      NOT NULL REFERENCES sys.member (id) ON DELETE CASCADE,
-    role_id        bigint      NOT NULL REFERENCES sys.role (id) ON DELETE CASCADE,
+    member_id      bigint      NOT NULL, -- REF->sys.member(id) 应用层维护
+    role_id        bigint      NOT NULL, -- REF->sys.role(id) 应用层维护
     effective_from timestamptz NOT NULL DEFAULT now(),
     effective_to   timestamptz, -- NULL = 长期有效
     granted_by     bigint,
@@ -591,21 +621,23 @@ ON TABLE sys.global_role IS '全局角色：不属于任何租户，用于超级
 CREATE TABLE sys.global_role_permission
 (
     id             bigint PRIMARY KEY,
-    global_role_id bigint      NOT NULL REFERENCES sys.global_role (id) ON DELETE CASCADE,
-    permission_id  bigint      NOT NULL REFERENCES sys.permission (id) ON DELETE CASCADE,
+    global_role_id bigint      NOT NULL, -- REF->sys.global_role(id) 应用层维护
+    permission_id  bigint      NOT NULL, -- REF->sys.permission(id) 应用层维护
     created_at     timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT uk_grp UNIQUE (global_role_id, permission_id)
 );
+CREATE INDEX idx_grp_permission ON sys.global_role_permission (permission_id);
 
 CREATE TABLE sys.user_global_role
 (
     id             bigint PRIMARY KEY,
-    user_id        bigint      NOT NULL REFERENCES sys.user_account (id) ON DELETE CASCADE,
-    global_role_id bigint      NOT NULL REFERENCES sys.global_role (id) ON DELETE CASCADE,
+    user_id        bigint      NOT NULL, -- REF->sys.user_account(id) 应用层维护
+    global_role_id bigint      NOT NULL, -- REF->sys.global_role(id) 应用层维护
     granted_by     bigint,
     created_at     timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT uk_ugr UNIQUE (user_id, global_role_id)
 );
+CREATE INDEX idx_ugr_role ON sys.user_global_role (global_role_id);
 COMMENT
 ON TABLE sys.user_global_role IS '用户持有的全局角色；超管用户绑定 is_super 的全局角色';
 
@@ -649,7 +681,7 @@ ON TABLE sys.data_object IS '受数据权限保护的资源（业务表）注册
 CREATE TABLE sys.data_scope_policy
 (
     id               bigint PRIMARY KEY,
-    object_id        bigint       NOT NULL REFERENCES sys.data_object (id) ON DELETE CASCADE,
+    object_id        bigint       NOT NULL, -- REF->sys.data_object(id) 应用层维护
     code             varchar(64)  NOT NULL,
     name             varchar(128) NOT NULL,
     scope_type       varchar(32)  NOT NULL,
@@ -684,11 +716,11 @@ ON TABLE sys.data_scope_policy IS '数据范围策略：系统级预置，租户
 CREATE TABLE sys.data_scope_binding
 (
     id             bigint PRIMARY KEY,
-    policy_id      bigint      NOT NULL REFERENCES sys.data_scope_policy (id) ON DELETE CASCADE,
+    policy_id      bigint      NOT NULL, -- REF->sys.data_scope_policy(id) 应用层维护
     subject_type   varchar(24) NOT NULL,               -- GLOBAL_ROLE / ROLE / MEMBER / PERMISSION
     subject_id     bigint      NOT NULL,
-    app_id         bigint REFERENCES sys.app (id),     -- NULL = 不限应用
-    tenant_id      bigint REFERENCES sys.tenant (id),  -- NULL = 系统级（超管分配）；有值 = 租户级收窄
+    app_id         bigint, -- NULL = 不限应用 | REF->sys.app(id) 应用层维护
+    tenant_id      bigint, -- NULL = 系统级（超管分配）；有值 = 租户级收窄 | REF->sys.tenant(id) 应用层维护
     -- 租户级绑定允许收窄的最大范围，防止租户管理员自我放大
     max_scope_type varchar(32),
     priority       int         NOT NULL DEFAULT 0,
@@ -707,6 +739,7 @@ CREATE TABLE sys.data_scope_binding
                                                                   'DENY_ALL'))
 
 );
+CREATE INDEX idx_dsb_policy ON sys.data_scope_binding (policy_id);
 CREATE INDEX idx_dsb_subject ON sys.data_scope_binding (subject_type, subject_id, status);
 CREATE INDEX idx_dsb_tenant ON sys.data_scope_binding (tenant_id) WHERE tenant_id IS NOT NULL;
 CREATE INDEX idx_dsb_app ON sys.data_scope_binding (app_id);
@@ -727,7 +760,7 @@ ON COLUMN sys.data_scope_binding.max_scope_type IS '租户级绑定可收窄的�
 -- ---------- 7.1 用户当前上下文（刷新页面/换设备可恢复）----------
 CREATE TABLE sys.user_context
 (
-    user_id           bigint PRIMARY KEY REFERENCES sys.user_account (id) ON DELETE CASCADE,
+    user_id           bigint PRIMARY KEY, -- REF->sys.user_account(id) 应用层维护
     current_member_id bigint,
     current_tenant_id bigint,
     current_app_id    bigint,
@@ -1021,11 +1054,11 @@ VALUES (1, 'TRADE', '商贩交易', 'BUSINESS', '/trade', 'shopping-cart', '农�
        (3, 'ADMIN', '系统管理', 'ADMIN', '/admin', 'setting', '超级管理员后台', true, 90);
 
 -- ---------- 租户类型 <-> 应用 ----------
-INSERT INTO sys.tenant_type_app (tenant_type_id, app_id, is_default_app, is_required)
-VALUES (1, 1, true, true),   -- 村(农户) 可用 商贩交易
-       (1, 2, false, false), -- 村(农户) 可用 农资交易
-       (2, 1, true, true),   -- 农贸市场(商贩) 仅可用 商贩交易
-       (3, 2, true, true);
+INSERT INTO sys.tenant_type_app (id, tenant_type_id, app_id, is_default_app, is_required)
+VALUES (1,1, 1, true, true),   -- 村(农户) 可用 商贩交易
+       (2, 1, 2, false, false), -- 村(农户) 可用 农资交易
+       (3, 2, 1, true, true),   -- 农贸市场(商贩) 仅可用 商贩交易
+       (4, 3, 2, true, true);
 -- 农资厂/代理商 仅可用 农资交易
 
 -- ---------- 身份类型 ----------
@@ -1074,17 +1107,17 @@ VALUES (1, 1, 'TRADE_ORDER_GLOBAL', '全部租户数据', 'GLOBAL', '{}'::jsonb,
        (7, 1, 'TRADE_ORDER_DENY', '禁止访问', 'DENY_ALL', '{}'::jsonb, 'DENY', 999, true, '黑名单，最高优先级');
 
 -- ---------- 超管默认数据范围：全局 ----------
-INSERT INTO sys.data_scope_binding (policy_id, subject_type, subject_id, priority, status)
-VALUES (1, 'GLOBAL_ROLE', 1, 100, 1);
+INSERT INTO sys.data_scope_binding (id, policy_id, subject_type, subject_id, priority, status)
+VALUES (1, 1, 'GLOBAL_ROLE', 1, 100, 1);
 
 -- ---------- 初始化超级管理员 ----------
 -- 密码 'Admin@123456' 的 bcrypt 占位，生产必须使用强密码并由运维在首次登录后强制修改
 INSERT INTO sys.user_account (id, username, phone, password, real_name, user_kind, status)
 VALUES (1, 'superadmin', '13000000000',
-        '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi',
+        '{bcrypt}$2a$10$DPytSd7voeyde4Q/em7U1OMVyXrLCU1LL15V58.iC1ZZRPEKIa2oS',
         '系统超级管理员', 'SUPER_ADMIN', 1);
 
-INSERT INTO sys.user_global_role (user_id, global_role_id, granted_by)
+INSERT INTO sys.user_global_role (id, user_id, global_role_id, granted_by)
 VALUES (1, 1, 1);
 
 -- ---------- identity 序列校准（手工指定 id 后必须对齐序列）----------

@@ -17,8 +17,8 @@ class TenantDao(
     override val rowMapper: RowMapper<Tenant> = rowMapperOf { rs ->
         Tenant(
             id = rs.getLong("id"),
-            tenantTypeId = rs.getLong("tenant_type_id"),
-            parentId = rs.getLong("parent_id"),
+            tenantTypeId = rs.getObject("tenant_type_id", Long::class.java),
+            parentId = rs.getObject("parent_id", Long::class.java),
             path = rs.getString("path") ?: "/",
             levelNo = rs.getInt("level_no"),
             code = rs.getString("code"),
@@ -35,9 +35,9 @@ class TenantDao(
             createdAt = rs.getObject("created_at", OffsetDateTime::class.java),
             updatedAt = rs.getObject("updated_at", OffsetDateTime::class.java),
             deletedAt = rs.getObject("deleted_at", OffsetDateTime::class.java),
-            createdBy = rs.getLong("created_by"),
-            updatedBy = rs.getLong("updated_by"),
-            deletedBy = rs.getLong("deleted_by"),
+            createdBy = rs.getObject("created_by", Long::class.java),
+            updatedBy = rs.getObject("updated_by", Long::class.java),
+            deletedBy = rs.getObject("deleted_by", Long::class.java),
             deleted = rs.getBoolean("deleted"),
         )
     }

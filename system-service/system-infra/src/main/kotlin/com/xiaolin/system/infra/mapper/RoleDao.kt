@@ -17,9 +17,9 @@ class RoleDao(
     override val rowMapper: RowMapper<Role> = rowMapperOf { rs ->
         Role(
             id = rs.getLong("id"),
-            tenantId = rs.getLong("tenant_id"),
-            appId = rs.getLong("app_id"),
-            parentId = rs.getLong("parent_id"),
+            tenantId = rs.getObject("tenant_id", Long::class.java),
+            appId = rs.getObject("app_id", Long::class.java),
+            parentId = rs.getObject("parent_id", Long::class.java),
             code = rs.getString("code"),
             name = rs.getString("name"),
             description = rs.getString("description"),
@@ -30,9 +30,9 @@ class RoleDao(
             createdAt = rs.getObject("created_at", OffsetDateTime::class.java),
             updatedAt = rs.getObject("updated_at", OffsetDateTime::class.java),
             deletedAt = rs.getObject("deleted_at", OffsetDateTime::class.java),
-            createdBy = rs.getLong("created_by"),
-            updatedBy = rs.getLong("updated_by"),
-            deletedBy = rs.getLong("deleted_by"),
+            createdBy = rs.getObject("created_by", Long::class.java),
+            updatedBy = rs.getObject("updated_by", Long::class.java),
+            deletedBy = rs.getObject("deleted_by", Long::class.java),
             deleted = rs.getBoolean("deleted"),
         )
     }

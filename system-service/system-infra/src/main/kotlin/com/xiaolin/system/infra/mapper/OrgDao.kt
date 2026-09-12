@@ -17,21 +17,21 @@ class OrgDao(
     override val rowMapper: RowMapper<Org> = rowMapperOf { rs ->
         Org(
             id = rs.getLong("id"),
-            tenantId = rs.getLong("tenant_id"),
-            parentId = rs.getLong("parent_id"),
+            tenantId = rs.getObject("tenant_id", Long::class.java),
+            parentId = rs.getObject("parent_id", Long::class.java),
             path = rs.getString("path") ?: "",
             levelNo = rs.getInt("level_no"),
             code = rs.getString("code"),
             name = rs.getString("name"),
-            leaderMemberId = rs.getLong("leader_member_id"),
+            leaderMemberId = rs.getObject("leader_member_id", Long::class.java),
             sortNo = rs.getInt("sort_no"),
             status = rs.getInt("status"),
             createdAt = rs.getObject("created_at", OffsetDateTime::class.java),
             updatedAt = rs.getObject("updated_at", OffsetDateTime::class.java),
             deletedAt = rs.getObject("deleted_at", OffsetDateTime::class.java),
-            createdBy = rs.getLong("created_by"),
-            updatedBy = rs.getLong("updated_by"),
-            deletedBy = rs.getLong("deleted_by"),
+            createdBy = rs.getObject("created_by", Long::class.java),
+            updatedBy = rs.getObject("updated_by", Long::class.java),
+            deletedBy = rs.getObject("deleted_by", Long::class.java),
             deleted = rs.getBoolean("deleted"),
         )
     }

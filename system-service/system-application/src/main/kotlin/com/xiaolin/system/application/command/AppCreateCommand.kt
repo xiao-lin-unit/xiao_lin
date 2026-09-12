@@ -2,6 +2,7 @@ package com.xiaolin.system.application.command
 
 import com.xiaolin.shared.common.constants.AppType
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 
 class AppCreateCommand(
     /** 应用编码，全局唯一 */
@@ -12,7 +13,7 @@ class AppCreateCommand(
     val name: String,
 
     /** BUSINESS 业务 / ADMIN 管理 / PORTAL 门户 */
-    @field:NotBlank(message = "请输入应用类型")
+    @field:NotNull(message = "请输入应用类型")
     val type: AppType = AppType.BUSINESS,
 
     /** 前端入口 */

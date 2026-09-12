@@ -37,9 +37,9 @@ class UserAccountDao(jdbc: NamedParameterJdbcTemplate
             createdAt = rs.getObject("created_at", OffsetDateTime::class.java),
             updatedAt = rs.getObject("updated_at", OffsetDateTime::class.java),
             deletedAt = rs.getObject("deleted_at", OffsetDateTime::class.java),
-            createdBy = rs.getLong("created_by"),
-            updatedBy = rs.getLong("updated_by"),
-            deletedBy = rs.getLong("deleted_by"),
+            createdBy = rs.getObject("created_by", Long::class.java),
+            updatedBy = rs.getObject("updated_by", Long::class.java),
+            deletedBy = rs.getObject("deleted_by", Long::class.java),
             deleted = rs.getBoolean("deleted")
         )
     }
