@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xiaolin.system.infra.mapper.UserAccountMapper">
+
+    <resultMap id="BaseResultMap" type="com.xiaolin.system.infra.persistence.UserAccount">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="real_name" property="realName" jdbcType="VARCHAR"/>
+        <result column="id_card_no" property="idCardNo" jdbcType="OTHER"/>
+        <result column="avatar" property="avatar" jdbcType="VARCHAR"/>
+        <result column="gender" property="gender" jdbcType="SMALLINT"/>
+        <result column="user_kind" property="userKind" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="SMALLINT"/>
+        <result column="pwd_updated_at" property="pwdUpdatedAt" jdbcType="TIMESTAMP_WITH_TIMEZONE"  javaType="java.time.OffsetDateTime"/>
+        <result column="pwd_expire_at" property="pwdExpireAt" jdbcType="TIMESTAMP_WITH_TIMEZONE"  javaType="java.time.OffsetDateTime"/>
+        <result column="last_login_at" property="lastLoginAt" jdbcType="TIMESTAMP_WITH_TIMEZONE"  javaType="java.time.OffsetDateTime"/>
+        <result column="last_login_ip" property="lastLoginIp" jdbcType="OTHER"/>
+        <result column="login_fail_count" property="loginFailCount" jdbcType="SMALLINT"/>
+        <result column="locked_until" property="lockedUntil" jdbcType="TIMESTAMP_WITH_TIMEZONE"  javaType="java.time.OffsetDateTime"/>
+        <result column="created_by" property="createdBy" jdbcType="BIGINT"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP_WITH_TIMEZONE"  javaType="java.time.OffsetDateTime"/>
+        <result column="updated_by" property="updatedBy" jdbcType="BIGINT"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP_WITH_TIMEZONE"  javaType="java.time.OffsetDateTime"/>
+        <result column="deleted" property="deleted" jdbcType="BOOLEAN"/>
+        <result column="deleted_by" property="deletedBy" jdbcType="BIGINT"/>
+        <result column="deleted_at" property="deletedAt" jdbcType="TIMESTAMP_WITH_TIMEZONE"  javaType="java.time.OffsetDateTime"/>
+    </resultMap>
+
+    <!-- 插入用户账号（全字段插入，所有列均传入值） -->
+    <insert id="insert" parameterType="com.xiaolin.system.infra.persistence.UserAccount"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys.user_account (
+            id, username, phone, email, password, real_name,
+            id_card_no, avatar, gender, user_kind, status,
+            pwd_updated_at, pwd_expire_at, last_login_at, last_login_ip,
+            login_fail_count, locked_until,
+            created_by, created_at, updated_by, updated_at,
+            deleted, deleted_by, deleted_at
+        )
+        VALUES (
+            #{user.id, jdbcType=BIGINT},
+            #{user.username, jdbcType=VARCHAR},
+            #{user.phone, jdbcType=VARCHAR},
+            #{user.email, jdbcType=VARCHAR},
+            #{user.password, jdbcType=VARCHAR},
+            #{user.realName, jdbcType=VARCHAR},
+            #{user.idCardNo, jdbcType=OTHER},
+            #{user.avatar, jdbcType=VARCHAR},
+            #{user.gender, jdbcType=SMALLINT},
+            #{user.userKind, jdbcType=VARCHAR},
+            #{user.status, jdbcType=SMALLINT},
+            #{user.pwdUpdatedAt, jdbcType=TIMESTAMP_WITH_TIMEZONE, javaType=java.time.OffsetDateTime},
+            #{user.pwdExpireAt, jdbcType=TIMESTAMP_WITH_TIMEZONE, javaType=java.time.OffsetDateTime},
+            #{user.lastLoginAt, jdbcType=TIMESTAMP_WITH_TIMEZONE, javaType=java.time.OffsetDateTime},
+            #{user.lastLoginIp, jdbcType=OTHER},
+            #{user.loginFailCount, jdbcType=SMALLINT},
+            #{user.lockedUntil, jdbcType=TIMESTAMP_WITH_TIMEZONE, javaType=java.time.OffsetDateTime},
+            #{user.createdBy, jdbcType=BIGINT},
+            #{user.createdAt, jdbcType=TIMESTAMP_WITH_TIMEZONE, javaType=java.time.OffsetDateTime},
+            #{user.updatedBy, jdbcType=BIGINT},
+            #{user.updatedAt, jdbcType=TIMESTAMP_WITH_TIMEZONE, javaType=java.time.OffsetDateTime},
+            #{user.deleted, jdbcType=BOOLEAN},
+            #{user.deletedBy, jdbcType=BIGINT},
+            #{user.deletedAt, jdbcType=TIMESTAMP_WITH_TIMEZONE, javaType=java.time.OffsetDateTime}
+        )
+    </insert>
+
+    <select id="getById" resultMap="BaseResultMap">
+        SELECT
+        id, username, phone, email, password, real_name,
+        id_card_no, avatar, gender, user_kind, status,
+        pwd_updated_at, pwd_expire_at, last_login_at, last_login_ip,
+        login_fail_count, locked_until,
+        created_by, created_at, updated_by, updated_at,
+        deleted, deleted_by, deleted_at
+        FROM sys.user_account WHERE id = #{id} AND deleted = false
+    </select>
+
+    <select id="list" resultMap="BaseResultMap">
+        SELECT
+        id, username, phone, email, password, real_name,
+        id_card_no, avatar, gender, user_kind, status,
+        pwd_updated_at, pwd_expire_at, last_login_at, last_login_ip,
+        login_fail_count, locked_until,
+        created_by, created_at, updated_by, updated_at,
+        deleted, deleted_by, deleted_at
+        FROM sys.user_account WHERE deleted = false
+    </select>
+
+</mapper>

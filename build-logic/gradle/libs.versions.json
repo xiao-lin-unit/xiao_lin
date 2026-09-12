@@ -1,0 +1,47 @@
+{
+  "versions": {
+    "project-version": "0.0.1",
+    "spring-boot-dependencies": "4.1.0"
+  },
+  "libraries": {
+    "spring-boot-dependencies": {
+      "module": "org.springframework.boot:spring-boot-dependencies",
+      "version": {
+        "ref": "spring-boot-dependencies"
+      }
+    },
+    "spring-context": {
+      "module": "org.springframework:spring-context",
+      "version": {
+        "ref": ""
+      }
+    },
+    "spring-boot-autoconfigure": {
+      "module": "org.springframework.boot:spring-boot-autoconfigure",
+      "version": {
+        "ref": ""
+      }
+    },
+    "postgresql": {
+      "module": "org.postgresql:postgresql",
+      "version": {
+        "ref": ""
+      }
+    },
+    "shared": {
+      "module": ":shared:shared-domain",
+      "version": {
+        "ref": "project-version"
+      }
+    }
+  },
+  "plugins": {
+
+  },
+  "bundles": {
+
+  },
+  "mavens": {
+    "aliyun": "https://maven.aliyun.com/repository/public"
+  }
+}

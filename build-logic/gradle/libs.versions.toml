@@ -1,0 +1,5 @@
+[versions]
+spring-boot-starter="4.1.0"
+
+[libraries]
+spring-boot-starter={ module="org.springframework.boot:spring-boot-starter", version.ref="spring-boot-starter" }
