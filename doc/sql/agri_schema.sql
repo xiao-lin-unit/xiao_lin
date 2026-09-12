@@ -1123,14 +1123,14 @@ VALUES (1, 1, 1);
 -- ---------- identity 序列校准（手工指定 id 后必须对齐序列）----------
 -- v2 说明：v1 中主键为裸 bigint，pg_get_serial_sequence 返回 NULL 导致 setval 报错；
 --          现主键均为 IDENTITY，pg_get_serial_sequence 可正常解析。
-SELECT setval(pg_get_serial_sequence('sys.tenant_type', 'id'), (SELECT max(id) FROM sys.tenant_type));
-SELECT setval(pg_get_serial_sequence('sys.app', 'id'), (SELECT max(id) FROM sys.app));
-SELECT setval(pg_get_serial_sequence('sys.identity_type', 'id'), (SELECT max(id) FROM sys.identity_type));
-SELECT setval(pg_get_serial_sequence('sys.permission', 'id'), (SELECT max(id) FROM sys.permission));
-SELECT setval(pg_get_serial_sequence('sys.global_role', 'id'), (SELECT max(id) FROM sys.global_role));
-SELECT setval(pg_get_serial_sequence('sys.data_object', 'id'), (SELECT max(id) FROM sys.data_object));
-SELECT setval(pg_get_serial_sequence('sys.data_scope_policy', 'id'), (SELECT max(id) FROM sys.data_scope_policy));
-SELECT setval(pg_get_serial_sequence('sys.user_account', 'id'), (SELECT max(id) FROM sys.user_account));
+-- SELECT setval(pg_get_serial_sequence('sys.tenant_type', 'id'), (SELECT max(id) FROM sys.tenant_type));
+-- SELECT setval(pg_get_serial_sequence('sys.app', 'id'), (SELECT max(id) FROM sys.app));
+-- SELECT setval(pg_get_serial_sequence('sys.identity_type', 'id'), (SELECT max(id) FROM sys.identity_type));
+-- SELECT setval(pg_get_serial_sequence('sys.permission', 'id'), (SELECT max(id) FROM sys.permission));
+-- SELECT setval(pg_get_serial_sequence('sys.global_role', 'id'), (SELECT max(id) FROM sys.global_role));
+-- SELECT setval(pg_get_serial_sequence('sys.data_object', 'id'), (SELECT max(id) FROM sys.data_object));
+-- SELECT setval(pg_get_serial_sequence('sys.data_scope_policy', 'id'), (SELECT max(id) FROM sys.data_scope_policy));
+-- SELECT setval(pg_get_serial_sequence('sys.user_account', 'id'), (SELECT max(id) FROM sys.user_account));
 
 -- ============================================================================
 --  十一、常用查询（权限快照计算，供应用层直接使用）
